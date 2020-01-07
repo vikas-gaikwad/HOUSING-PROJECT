@@ -65,7 +65,7 @@ public class UserRepositoryImpl implements IUserRepository {
 	public String checkAlreadyRegistered(String emailId) {
 		String checkEmail = null;
 		try {
-			String checkAlreadyRegistered = "select login_id from `registration` where email_id =? order by createdAt desc limit 1";
+			String checkAlreadyRegistered = "select id from `housing_registration` where email =? order by createdAt desc limit 1";
 			checkEmail = jdbcTemplate.queryForObject(checkAlreadyRegistered, new Object[] { emailId }, String.class);
 			System.out.println(checkEmail);
 		} catch (Exception e) {
@@ -205,7 +205,7 @@ public class UserRepositoryImpl implements IUserRepository {
 		String status=null;
 		String CHECK_LOGIN_CREDENTIALS;
 		String login_credentials=null;
-		CHECK_LOGIN_CREDENTIALS="select resistration_id from housing_registration where email =? and password = ? and registration_type = ? order by createdAt desc limit 1";
+		CHECK_LOGIN_CREDENTIALS="select id from housing_registration where email =? and password = ? and registration_type = ? order by createdAt desc limit 1";
 		try {
 			login_credentials= jdbcTemplate.queryForObject(CHECK_LOGIN_CREDENTIALS, new Object[] { obj.getEmail() , obj.getPassword(), obj.getRegistration_type() }, String.class);
 			System.out.println(login_credentials);
@@ -215,49 +215,35 @@ public class UserRepositoryImpl implements IUserRepository {
 		
 		if(login_credentials != null) {
 			String FOUND_INFO_OF_LOGIN_USER_FROM_registered_flat_details_TABLES;
-			String login_credentials_=null;
-			FOUND_INFO_OF_LOGIN_USER_FROM_registered_flat_details_TABLES="select * from  registered_flat_details where  resistraion_id =?    limit 1";
-			login_credentials_=jdbcTemplate.queryForObject(FOUND_INFO_OF_LOGIN_USER_FROM_registered_flat_details_TABLES, new Object[] {login_credentials}, String.class);
-			System.out.println(login_credentials_);
-			String GET_CURRENT_LOGIN_USER_DATA;
-			GET_CURRENT_LOGIN_USER_DATA=
-					" select  " + 
-							" h.first_name, " + 
-							" h.last_name, " + 
-							" h.email, " + 
-							" h.mobile1, " + 
-							" h.mobile2, " + 
-							" h.address, " + 
-							" h.createdAt, " + 
-							" h.registration_type, " + 
-							" r.building_or_house_or_tower_name, " + 
-							" r.city, " + 
-							" r.district, " + 
-							" r.flat_id, " + 
-							" r.flat_no, " + 
-							" r.landmark, " + 
-							" r.pin, " + 
-							" r.plot_no, " + 
-							" r.sector, " + 
-							" r.state, " + 
-							" r.taluka  " + 
-							"from housing_registration h RIGHT JOIN registered_flat_details r  " + 
-							"ON h.resistration_id = r.resistraion_id where h.resistration_id=? " 	;
-			
-			List<Map<String, Object>> adminData= jdbcTemplate.queryForList(GET_CURRENT_LOGIN_USER_DATA,login_credentials);
-			JSONObject json= new JSONObject();
-			if(adminData.size() >=0) {
-				try {
-					json.put("admin_info", adminData);
-					json.put("status", "Success");
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				
+//			String login_credentials_=null;
+			List<Map<String, Object>>	login_credentials_ = null;
+			FOUND_INFO_OF_LOGIN_USER_FROM_registered_flat_details_TABLES=
+					"select * from  housing_registration where  id =?    limit 1";
+			try {
+				login_credentials_=jdbcTemplate.queryForList(FOUND_INFO_OF_LOGIN_USER_FROM_registered_flat_details_TABLES,  login_credentials);
+			} catch (DataAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			return json.toString();
+				System.out.println(">>>>"+login_credentials);
+				JSONObject returnObj = new JSONObject();
+				if(login_credentials_.size()>=0) {
+					try {
+						returnObj.put("userInfo", login_credentials_);
+						returnObj.put("Status", "Success");
+					} catch (Exception e) {
+						e.printStackTrace();
+						return status= "{\"Status\": \"Fail\",\"Reason\": \"LOGIN FAIL, ID & PASSWORD DO NOT MATCHED\"}";
+						
+					}
+				}
+				System.out.println(login_credentials_);
+				return returnObj.toString();
+			
+			
+
 		} else {
-			status= "{\"status\": \"Fail\",\"reason\": \"LOGIN FAIL, ID & PASSWORD DO NOT MATCHED\"}";
+			status= "{\"Status\": \"Fail\",\"Reason\": \"LOGIN FAIL, ID & PASSWORD DO NOT MATCHED\"}";
 		}
 		
 		return status;

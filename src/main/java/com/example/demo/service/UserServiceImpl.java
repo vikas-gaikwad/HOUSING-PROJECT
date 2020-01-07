@@ -61,18 +61,25 @@ public class UserServiceImpl implements IUserService{
 		
 		HousingSocietyMainObject obj= new HousingSocietyMainObject();
 		JSONObject json=new JSONObject(object);	
-		obj.setFirst_name(json.getString("first_name"));
-		obj.setLast_name(json.getString("last_name"));
-		obj.setEmail(json.getString("email"));
-		obj.setMobile1(json.getString("mobile1"));
-		obj.setMobile2(json.getString("mobile2"));
-		obj.setGender(json.getString("gender"));
-		obj.setAddress(json.getString("address"));
-		obj.setRegistration_type(json.getString("registration_type"));
-//		JSONArray jArr=json.getJSONArray("house_info");
-		
-		
-		
+		String emailID=json.getString("email");
+		String check_email_registered=userRepository.checkAlreadyRegistered(emailID);
+		JSONObject reponseJson=new JSONObject(check_email_registered);
+		String reason=reponseJson.getString("reason");
+		System.out.println("REASON>>"+reason);
+		if(reason.equals("Email_not_found")) {
+			obj.setFirst_name(json.getString("first_name"));
+			obj.setLast_name(json.getString("last_name"));
+			obj.setEmail(json.getString("email"));
+			obj.setMobile1(json.getString("mobile1"));
+			obj.setMobile2(json.getString("mobile2"));
+			obj.setGender(json.getString("gender"));
+			obj.setAddress(json.getString("address"));
+			obj.setRegistration_type(json.getString("registration_type"));
+//			JSONArray jArr=json.getJSONArray("house_info");
+		}
+		else{
+			return check_email_registered;
+		}		
 		return userRepository.registrationHousing(obj,password);
 	}
 

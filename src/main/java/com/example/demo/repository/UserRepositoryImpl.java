@@ -104,7 +104,7 @@ public class UserRepositoryImpl implements IUserRepository {
 	
 	@Override
 	@Transactional(rollbackFor= {Exception.class , RuntimeException.class})
-	public String registrationHousing(HousingSocietyMainObject obj,String password) {
+	public String registrationHousing(HousingSocietyMainObject obj,String password) { 
 		
 		
 		
